@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Baby Luna | Valentine 2025</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-pink: #ff4d8d;
+            --primary-red: #ff1f1f;
+            --glass: rgba(12, 10, 9, 0.7);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0c0a09;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* --- Layer 1: Aurora Gradient --- */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 50% 50%, #1a1010 0%, #0c0a09 100%);
+        }
+
+        .aurora-layer {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: -1;
+            mix-blend-mode: screen;
+        }
+
+        .aurora-1 { background: radial-gradient(circle, hsla(333, 70%, 55%, 0.4) 0%, transparent 50%); animation: drift 20s infinite alternate; }
+        .aurora-2 { background: radial-gradient(circle, hsla(282, 82%, 54%, 0.3) 0%, transparent 50%); animation: drift 25s infinite alternate-reverse; }
+        .aurora-3 { background: radial-gradient(circle, hsla(210, 89%, 60%, 0.3) 0%, transparent 50%); animation: drift 18s infinite linear; }
+        .aurora-4 { background: radial-gradient(circle, hsla(35, 90%, 60%, 0.3) 0%, transparent 50%); animation: drift 22s infinite ease-in-out; }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) rotate(0deg); }
+            to { transform: translate(10%, 15%) rotate(10deg); }
+        }
+
+        /* --- Layer 2: Three.js Canvas --- */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- UI Components --- */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .active-card {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #ffb6c1, #ffecf0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-valentine {
+            background: linear-gradient(45deg, var(--primary-pink), var(--primary-red));
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(255, 77, 141, 0.4);
+            display: inline-block;
+            margin-top: 1.5rem;
+            cursor: pointer;
+        }
+
+        .btn-valentine:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 77, 141, 0.6);
+        }
+
+        .btn-valentine:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Progress Bar --- */
+        .progress-container {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-pink), var(--primary-red));
+            transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #no-btn {
+            position: relative;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Backgrounds -->
+    <div class="aurora-bg">
+        <div class="aurora-layer aurora-1"></div>
+        <div class="aurora-layer aurora-2"></div>
+        <div class="aurora-layer aurora-3"></div>
+        <div class="aurora-layer aurora-4"></div>
+    </div>
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="main-progress"></div>
+    </div>
+
+    <!-- Step 1: Welcome -->
+    <div class="glass-card active-card" id="step-1">
+        <div class="step-content">
+            <h1 class="text-4xl md:text-5xl font-bold text-gradient mb-2">Hi, Baby Luna</h1>
+            <p class="text-gray-300 text-lg leading-relaxed">I have a little secret to share with you today. Are you ready to begin our journey?</p>
+            <div>
+                <button class="btn-valentine" onclick="nextStep(2)">Yes, let's go ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: The Memory -->
+    <div class="glass-card" id="step-2">
+        <div class="step-content">
+            <h2 class="text-3xl font-bold text-gradient mb-2">Our Moments</h2>
+            <p class="text-gray-300 text-lg leading-relaxed">Since you walked into my life, every day feels like a scene from a dream. You're the glow in my dark and the melody in my silence.</p>
+            <div>
+                <button class="btn-valentine" onclick="nextStep(3)">Keep going...</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Deep Feelings -->
+    <div class="glass-card" id="step-3">
+        <div class="step-content">
+            <h2 class="text-3xl font-bold text-gradient mb-2">My Favorite Girl</h2>
+            <p class="text-gray-300 text-lg leading-relaxed">"Baby Luna" isn't just a name; it’s my favorite thought. You've taught me what it means to be truly happy, and I cherish every second with you.</p>
+            <div>
+                <button class="btn-valentine" onclick="nextStep(4)">Wait, one more thing...</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: The Question -->
+    <div class="glass-card" id="step-4">
+        <div class="step-content">
+            <h2 class="text-3xl font-bold text-gradient mb-2">The Big Question</h2>
+            <p class="text-gray-300 text-lg leading-relaxed">Will you make me the luckiest person in the world and be my Valentine, Baby Luna?</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+                <button class="btn-valentine" onclick="finalStep()">YES! ❤️</button>
+                <button class="btn-valentine" id="no-btn" onmouseover="dodgeButton()">Maybe?</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: The Finale -->
+    <div class="glass-card" id="step-5">
+        <div class="step-content">
+            <h2 class="text-4xl font-bold text-gradient mb-2">Forever Yours.</h2>
+            <p class="text-gray-300 text-lg leading-relaxed">You've made me the happiest! I love you more than words can express, Baby Luna. Let's make this Valentine's Day unforgettable.</p>
+            <p class="text-sm italic text-pink-400 mt-4">Happy Valentine's Day, My Love!</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        // --- Three.js 3D Hearts ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const hearts = [];
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(25, 25);
+        heartShape.bezierCurveTo(25, 25, 20, 0, 0, 0);
+        heartShape.bezierCurveTo(-30, 0, -30, 35, -30, 35);
+        heartShape.bezierCurveTo(-30, 55, -10, 77, 25, 95);
+        heartShape.bezierCurveTo(60, 77, 80, 55, 80, 35);
+        heartShape.bezierCurveTo(80, 35, 80, 0, 50, 0);
+        heartShape.bezierCurveTo(35, 0, 25, 25, 25, 25);
+
+        const extrudeSettings = { depth: 8, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+        const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+        geometry.scale(0.01, 0.01, 0.01);
+        geometry.center();
+
+        const heartMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff4d8d, 
+            roughness: 0.3, 
+            metalness: 0.5,
+            emissive: 0xff1f1f,
+            emissiveIntensity: 0.2
+        });
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+
+        for (let i = 0; i < 25; i++) {
+            const heart = new THREE.Mesh(geometry, heartMaterial.clone());
+            heart.position.set(
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 10,
+                (Math.random() - 0.5) * 10
+            );
+            heart.rotation.y = Math.random() * Math.PI;
+            heart.rotation.z = Math.random() * Math.PI;
+            const scale = 0.5 + Math.random();
+            heart.scale.set(scale, scale, scale);
+            
+            heart.userData = {
+                speedX: (Math.random() - 0.5) * 0.005,
+                speedY: (Math.random() - 0.5) * 0.005,
+                rotSpeed: (Math.random() - 0.5) * 0.01
+            };
+            
+            hearts.push(heart);
+            scene.add(heart);
+        }
+
+        camera.position.z = 8;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            hearts.forEach(heart => {
+                heart.position.y += Math.sin(Date.now() * 0.001 + heart.position.x) * 0.002;
+                heart.rotation.y += heart.userData.rotSpeed;
+                heart.rotation.x += heart.userData.rotSpeed * 0.5;
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- Navigation Logic ---
+        function updateProgressBar() {
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            gsap.to("#main-progress", { width: `${progress}%`, duration: 0.8, ease: "power2.out" });
+        }
+
+        function nextStep(step) {
+            const currentCard = `#step-${currentStep}`;
+            const nextCard = `#step-${step}`;
+
+            gsap.to(currentCard, { 
+                y: -50, 
+                opacity: 0, 
+                duration: 0.6, 
+                ease: "power2.in",
+                onComplete: () => {
+                    document.querySelector(currentCard).style.visibility = 'hidden';
+                    document.querySelector(nextCard).style.visibility = 'visible';
+                    currentStep = step;
+                    updateProgressBar();
+                    gsap.fromTo(nextCard, 
+                        { y: 50, opacity: 0 }, 
+                        { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
+                    );
+                }
+            });
+        }
+
+        function finalStep() {
+            // Swirl hearts away
+            hearts.forEach(heart => {
+                gsap.to(heart.position, {
+                    x: heart.position.x * 5,
+                    y: 20,
+                    z: heart.position.z * 5,
+                    duration: 3,
+                    ease: "power2.in"
+                });
+                gsap.to(heart.material, { opacity: 0, duration: 2 });
+            });
+
+            // Confetti explosion
+            const duration = 5 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 250);
+
+            nextStep(5);
+        }
+
+        // Playful "No" button dodge
+        function dodgeButton() {
+            const btn = document.getElementById('no-btn');
+            const x = Math.random() * (window.innerWidth - btn.clientWidth) - (window.innerWidth/2 - btn.clientWidth);
+            const y = Math.random() * (window.innerHeight - btn.clientHeight) - (window.innerHeight/2 - btn.clientHeight);
+            
+            gsap.to(btn, {
+                x: x * 0.3,
+                y: y * 0.3,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initial setup
+        updateProgressBar();
+    </script>
+</body>
+</html>
